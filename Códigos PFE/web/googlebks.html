@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Books & Palavraria</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #22333b;
+            --color-secondary: #c6ad8f;
+            --color-background: #faf9f6;
+            --color-text-primary: #22333b;
+            --color-text-secondary: #566270;
+            --color-border: #e0d9cf;
+            --color-hover: #1a282e;
+            --color-success: #4caf50;
+            --color-error: #f44336;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header principal */
+        .main-header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Cal Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--color-secondary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--color-primary);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            width: 200px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .profile-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .profile-menu a:hover {
+            background-color: var(--color-background);
+            border-left-color: var(--color-secondary);
+        }
+
+        .profile-menu i {
+            margin-right: 10px;
+            width: 18px;
+            color: var(--color-text-secondary);
+        }
+
+        .user-profile:hover .profile-menu {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Header de conteúdo */
+        .content-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-secondary);
+        }
+
+        .content-header h1 {
+            font-family: 'Cal Sans', sans-serif;
+            font-size: 2.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--color-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .content-header p {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Barra de pesquisa */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius) 0 0 var(--radius);
+            font-size: 1rem;
+            background-color: white;
+            color: var(--color-text-primary);
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 0 3px rgba(198, 173, 143, 0.2);
+        }
+
+        #searchInput::placeholder {
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+
+        #searchBtn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 0 1.75rem;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #searchBtn:hover {
+            background-color: var(--color-hover);
+        }
+
+        /* Resultados */
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .book-thumbnail-container {
+            position: relative;
+            overflow: hidden;
+            height: 200px;
+        }
+
+        .book-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .book-card:hover .book-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .book-info {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+            font-weight: 600;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-authors {
+            color: var(--color-text-secondary);
+            margin-bottom: 0.75rem;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        .book-published {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: auto;
+        }
+
+        /* Detalhes do livro */
+        .book-details {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .book-details.active {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        .details-header {
+            display: flex;
+            margin-bottom: 1.75rem;
+            gap: 1.75rem;
+        }
+
+        .details-thumbnail {
+            width: 160px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+        }
+
+        .details-info {
+            flex: 1;
+        }
+
+        .details-title {
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+            color: var(--color-primary);
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .details-authors {
+            font-size: 1.2rem;
+            color: var(--color-secondary);
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+        }
+
+        .details-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .meta-item {
+            background: var(--color-background);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .details-description {
+            margin-top: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .details-description h3 {
+            margin-bottom: 0.75rem;
+            color: var(--color-primary);
+            font-size: 1.3rem;
+        }
+
+        .details-description p {
+            color: var(--color-text-primary);
+            background: var(--color-background);
+            padding: 1.25rem;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--color-secondary);
+        }
+
+        .back-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            background-color: var(--color-hover);
+            transform: translateX(-5px);
+        }
+
+        /* Estados */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            background-color: #ffebee;
+            color: var(--color-error);
+            border-radius: var(--radius);
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .error i {
+            font-size: 2rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .no-results i {
+            font-size: 2.5rem;
+            opacity: 0.7;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 900px) {
+            .details-header {
+                flex-direction: column;
+            }
+
+            .details-thumbnail {
+                align-self: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo span {
+                font-size: 1.25rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .content-header h1 {
+                font-size: 2.25rem;
+            }
+
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            #searchInput {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            #searchBtn {
+                border-radius: 0 0 var(--radius) var(--radius);
+                padding: 1rem;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-header h1 {
+                font-size: 2rem;
+            }
+
+            .details-title {
+                font-size: 1.6rem;
+            }
+
+            .details-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .meta-item {
+                width: 100%;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--color-primary);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <img src="./img/logo.png" alt="Logo"
+                style="height:44px; width:auto; display:block; object-fit:contain; background:transparent; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+            <span>Sistema de Buscas</span>
+        </div>
+        <div class="user-profile">
+            <div class="user-info">
+                <span class="user-name">Usuário</span>
+                <span class="user-role">@usuário</span>
+            </div>
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-menu">
+                <a href="./profile.html"><i class="fas fa-user"></i> Meu Perfil</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content-header">
+            <h1><i class="fas fa-book"></i> Palavraria</h1>
+            <p>Encontre livros usando a API do Google Books integrada à Palavraria 🔍</p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Digite o título, autor ou assunto do livro">
+            <button id="searchBtn"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+
+        <div id="results">
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>Faça sua busca na API integrada à Palavraria</p>
+            </div>
+        </div>
+
+        <div id="bookDetails" class="book-details">
+            <!-- Detalhes do livro serão inseridos aqui -->
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 Palavraria - Projeto de TCC</p>
+    </footer>
+
+    <script>
+        document.getElementById("searchBtn").addEventListener("click", searchBooks);
+        document.getElementById("searchInput").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                searchBooks();
+            }
+        });
+
+        async function searchBooks() {
+            const query = document.getElementById("searchInput").value.trim();
+
+            if (!query) {
+                alert("Digite algo para buscar");
+                return;
+            }
+
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Buscando livros...</p>
+                </div>`;
+
+            try {
+                const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20`);
+                const data = await res.json();
+
+                resultsDiv.innerHTML = "";
+
+                if (data.items && data.items.length > 0) {
+                    const resultsContainer = document.createElement("div");
+                    resultsContainer.className = "results-container";
+
+                    data.items.forEach(book => {
+                        const bookCard = createBookCard(book);
+                        resultsContainer.appendChild(bookCard);
+                    });
+
+                    resultsDiv.appendChild(resultsContainer);
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Nenhum livro encontrado. Tente usar outros termos de busca.</p>
+                        </div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Ocorreu um erro na busca. Tente novamente mais tarde.</p>
+                    </div>`;
+            }
+        }
+
+        function createBookCard(book) {
+            const bookCard = document.createElement("div");
+            bookCard.className = "book-card";
+
+            const volumeInfo = book.volumeInfo;
+            const title = volumeInfo.title || "Sem título";
+            const authors = volumeInfo.authors ? volumeInfo.authors.join(", ") : "Autor desconhecido";
+            const publishedDate = volumeInfo.publishedDate || "Data desconhecida";
+            const thumbnail = volumeInfo.imageLinks ? volumeInfo.imageLinks.thumbnail : "https://via.placeholder.com/150x200?text=Sem+Imagem";
+
+            bookCard.innerHTML = `
+                <div class="book-thumbnail-container">
+                    <img src="${thumbnail}" alt="${title}" class="book-thumbnail">
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">${title}</h3>
+                    <p class="book-authors">${authors}</p>
+                    <p class="book-published">Publicado: ${publishedDate}</p>
+                </div>`;
+
+            bookCard.addEventListener("click", () => showBookDetails(book));
+            return bookCard;
+        }
+
+        function showBookDetails(book) {
+            const volumeInfo = book.volumeInfo;
+            const title = volumeInfo.title || "Sem título";
+            const authors = volumeInfo.authors ? volumeInfo.authors.join(", ") : "Autor desconhecido";
+            const publishedDate = volumeInfo.publishedDate || "Data desconhecida";
+            const publisher = volumeInfo.publisher || "Editora desconhecida";
+            const pageCount = volumeInfo.pageCount || "Número de páginas não informado";
+            const categories = volumeInfo.categories ? volumeInfo.categories.join(", ") : "Categorias não informadas";
+            const description = volumeInfo.description || "Descrição não disponível.";
+            const thumbnail = volumeInfo.imageLinks ? volumeInfo.imageLinks.thumbnail.replace("http://", "https://") : "https://via.placeholder.com/150x200?text=Sem+Imagem";
+            const averageRating = volumeInfo.averageRating || "Não avaliado";
+            const ratingsCount = volumeInfo.ratingsCount || "Sem avaliações";
+
+            const bookDetailsDiv = document.getElementById("bookDetails");
+            bookDetailsDiv.innerHTML = `
+                <button class="back-btn" onclick="hideBookDetails()"><i class="fas fa-arrow-left"></i> Voltar para resultados</button>
+                <div class="details-header">
+                    <img src="${thumbnail}" alt="${title}" class="details-thumbnail">
+                    <div class="details-info">
+                        <h2 class="details-title">${title}</h2>
+                        <p class="details-authors">Por: ${authors}</p>
+                        <div class="details-meta">
+                            <span class="meta-item"><i class="fas fa-calendar-alt"></i> ${publishedDate}</span>
+                            <span class="meta-item"><i class="fas fa-building"></i> ${publisher}</span>
+                            <span class="meta-item"><i class="fas fa-file"></i> ${pageCount} páginas</span>
+                            <span class="meta-item"><i class="fas fa-star"></i> ${averageRating} (${ratingsCount})</span>
+                        </div>
+                        <p><strong>Categorias:</strong> ${categories}</p>
+                    </div>
+                </div>
+                <div class="details-description">
+                    <h3>Descrição</h3>
+                    <p>${description}</p>
+                </div>`;
+
+            bookDetailsDiv.classList.add("active");
+            bookDetailsDiv.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function hideBookDetails() {
+            const bookDetailsDiv = document.getElementById("bookDetails");
+            bookDetailsDiv.classList.remove("active");
+            document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+        }
+    </script>
+</body>
+
+</html>
