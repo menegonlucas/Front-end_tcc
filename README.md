@@ -1,6 +1,6 @@
 #### 📂 Descrição do Repositório
 
-> Este repositório reúne todo o desenvolvimento do projeto final do curso Técnico em Desenvolvimento de Sistemas, contemplando **Front-end** e **Back-end**.  
+> Este repositório reúne todo o desenvolvimento do projeto final do curso Técnico em Desenvolvimento de Sistemas, contemplando **Front-end**.
 As atualizações são frequentes para garantir o progresso contínuo e o versionamento seguro dos arquivos.
 
 ---
@@ -12,5 +12,5 @@ As atualizações são frequentes para garantir o progresso contínuo e o versio
 
 ---
 
-- Na pasta *docs* você terá acesso a documentação completa atualizada
-- Acesse o site  https://menegonlucas.github.io/projeto_tcc/
+- Na pasta *Documentação* você terá acesso a documentação completa atualizada
+- Acesse o projeto colocado em serviço de nuvem 'Git Pages'.
