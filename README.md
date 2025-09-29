@@ -11,3 +11,4 @@ As atualizações são frequentes para garantir o progresso contínuo e o versio
 --- 
 
 Esse repositório front-end inclui integração com o back-end pelo Vercel.
+> Link para acessar o site no GIT PAGES: https://menegonlucas.github.io/Front-end_tcc/
