@@ -1,16 +1,13 @@
-#### 📂 Descrição do Repositório
+#### 📂 Sobre o repositório
 
-> Este repositório reúne todo o desenvolvimento do projeto final do curso Técnico em Desenvolvimento de Sistemas, contemplando **Front-end**.
+Este repositório reúne todo o desenvolvimento do projeto final do curso Técnico em Desenvolvimento de Sistemas, contemplando **Front-end**.
 As atualizações são frequentes para garantir o progresso contínuo e o versionamento seguro dos arquivos.
-
----
-#### O projeto está organizado da seguinte maneira: 
-
-1. **Página de Login**
-2. **Página de Início** que o usuário pode procurar por livros na API integrada ao projeto.
-3. **Página do perfil do usuário.** Aqui, você pode colocar seus livros, filtrar, atualizar progresso e realizar comentários.
 
 ---
 
 - Na pasta *Documentação* você terá acesso a documentação completa atualizada
 - Acesse o projeto colocado em serviço de nuvem 'Git Pages'
+
+--- 
+
+Esse repositório front-end inclui integração com o back-end pelo Vercel.
