@@ -85,11 +85,19 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.form');
+            const inputs = document.querySelectorAll('.input');
 
-            form.addEventListener('submit', function (e) {
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => input.parentElement.classList.add('focused'));
+                input.addEventListener('blur', () => {
+                    if (!input.value) input.parentElement.classList.remove('focused');
+                });
+                if (input.value) input.parentElement.classList.add('focused');
+            });
+
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-
-                const email = form.querySelector('input[name="email"]').value;
+                const email = form.querySelector('input[name="email"]').value.trim();
                 const password = form.querySelector('input[name="password"]').value;
 
                 if (!email || !password) {
@@ -97,28 +105,39 @@
                     return;
                 }
 
-                alert('Login realizado com sucesso! Redirecionando...');
-            });
+                try {
+                    const res = await fetch('https://tcc-back-2025.vercel.app/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, senha: password }) // <- backend espera "senha", não "password"
+                    });
 
-            const inputs = document.querySelectorAll('.input');
+                    const data = await res.json();
 
-            inputs.forEach(input => {
-                input.addEventListener('focus', function () {
-                    this.parentElement.classList.add('focused');
-                });
+                    if (res.ok) {
+                        alert('Login bem-sucedido!');
 
-                input.addEventListener('blur', function () {
-                    if (this.value === '') {
-                        this.parentElement.classList.remove('focused');
+                        // Salva token, se existir (verifique com seu backend)
+                        if (data.token) {
+                            localStorage.setItem('token', data.token);
+                        }
+
+                        // Redireciona para o painel admin
+                        window.location.href = './web/profile.html'; // ajuste o caminho se necessário
+                    } else {
+                        alert(data.message || 'Usuário ou senha inválidos');
                     }
-                });
-
-                if (input.value !== '') {
-                    input.parentElement.classList.add('focused');
+                } catch (err) {
+                    console.error(err);
+                    alert('Erro na conexão com o servidor de autenticação.');
                 }
             });
         });
     </script>
+
+
 </body>
 
 </html>
