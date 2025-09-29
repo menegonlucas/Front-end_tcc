@@ -13,4 +13,4 @@ As atualizações são frequentes para garantir o progresso contínuo e o versio
 ---
 
 - Na pasta *Documentação* você terá acesso a documentação completa atualizada
-- Acesse o projeto colocado em serviço de nuvem 'Git Pages'.
+- Acesse o projeto colocado em serviço de nuvem 'Git Pages'
