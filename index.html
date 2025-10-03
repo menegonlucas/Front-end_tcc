@@ -85,33 +85,23 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.form');
-            const inputs = document.querySelectorAll('.input');
-
-            inputs.forEach(input => {
-                input.addEventListener('focus', () => input.parentElement.classList.add('focused'));
-                input.addEventListener('blur', () => {
-                    if (!input.value) input.parentElement.classList.remove('focused');
-                });
-                if (input.value) input.parentElement.classList.add('focused');
-            });
 
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                const email = form.querySelector('input[name="email"]').value.trim();
-                const password = form.querySelector('input[name="password"]').value;
 
-                if (!email || !password) {
+                const email = form.querySelector('input[name="email"]').value.trim();
+                const senha = form.querySelector('input[name="password"]').value;
+
+                if (!email || !senha) {
                     alert('Por favor, preencha todos os campos.');
                     return;
                 }
 
                 try {
-                    const res = await fetch('https://tcc-back-2025.vercel.app/auth/login', {
+                    const res = await fetch("https://tcc-back-2025.vercel.app/api/auth/login", {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, senha: password }) // <- backend espera "senha", não "password"
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, senha }) // atenção: backend espera "senha"
                     });
 
                     const data = await res.json();
@@ -119,23 +109,24 @@
                     if (res.ok) {
                         alert('Login bem-sucedido!');
 
-                        // Salva token, se existir (verifique com seu backend)
+                        // salva token se existir
                         if (data.token) {
                             localStorage.setItem('token', data.token);
                         }
 
-                        // Redireciona para o painel admin
-                        window.location.href = './web/profile.html'; // ajuste o caminho se necessário
+                        // redireciona para a página de admin
+                        window.location.href = './web/profile.html';
                     } else {
-                        alert(data.message || 'Usuário ou senha inválidos');
+                        alert(data.message || 'Usuário ou senha inválidos.');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Erro na conexão com o servidor de autenticação.');
+                    alert('Erro na conexão com o servidor.');
                 }
             });
         });
     </script>
+
 
 
 </body>
