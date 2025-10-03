@@ -45,13 +45,6 @@
           <p><span id="books-read">0</span> livros lidos • <span id="books-in-progress">0</span> em progresso</p>
         </div>
       </div>
-      <div class="favorite-books">
-        <h3>Top 5 Livros Favoritos</h3>
-        <div class="favorites-list" id="favorites-list">
-          <div class="empty-state">Nenhum favorito adicionado</div>
-        </div>
-        <button id="add-favorite-btn" class="add-favorite-btn" type="button">Adicionar favoritos</button>
-      </div>
     </section>
 
     <main class="profile-container">
@@ -62,7 +55,6 @@
             <label for="book-select">O que você está lendo?</label>
             <select id="book-select" required>
               <option value="">Selecione um livro</option>
-              <!-- As opções serão preenchidas via JavaScript -->
             </select>
           </div>
           <div class="form-row">
@@ -81,34 +73,43 @@
             </div>
             <span class="progress-percentage" id="progress-percentage">0%</span>
           </div>
-          <div class="form-group">
-            <label for="comment">Comentário (opcional)</label>
-            <textarea id="comment" rows="3" placeholder="Adicione um comentário sobre sua leitura..."></textarea>
-          </div>
           <button type="submit" class="submit-button">Registrar Progresso</button>
         </form>
 
-        <h3 style="margin-top: 1.5rem;">Registros Recentes</h3>
-        <ul class="recent-logs-list" id="recent-logs">
-          <div class="empty-state">Nenhum registro de leitura encontrado</div>
-        </ul>
+        <!-- Registros + Comentários lado a lado -->
+        <div class="progress-extras">
+          <div class="recent-logs">
+            <h3>Registros Recentes</h3>
+            <ul class="recent-logs-list" id="recent-logs">
+              <div class="empty-state">Nenhum registro de leitura encontrado</div>
+            </ul>
+          </div>
+
+          <div class="comments-section">
+            <h3>Comentários</h3>
+            <textarea id="comment" rows="3" placeholder="Adicione um comentário sobre sua leitura..."></textarea>
+            <button id="save-comment-btn" class="submit-button">Salvar Comentário</button>
+            <ul id="comments-list" class="comments-list">
+              <div class="empty-state">Nenhum comentário adicionado</div>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <section id="all-books-section">
         <h2>Minha Biblioteca</h2>
-        <form id="add-book-form" class="add-book-form">
-          <input type="text" id="book-title" placeholder="Título do livro" required>
-          <input type="text" id="book-author" placeholder="Autor" required>
-          <select id="book-status">
-            <option value="quero-ler">Quero Ler</option>
-            <option value="lendo">Lendo</option>
-            <option value="lido">Lido</option>
-            <option value="relendo">Relendo</option>
-            <option value="abandonado">Abandonado</option>
-          </select>
-          <button type="submit" class="submit-button">Adicionar Livro</button>
-        </form>
 
+        <!-- PESQUISA DE LIVROS -->
+        <div class="search-books">
+          <h3>Pesquisar Livro</h3>
+          <form id="search-book-form">
+            <input type="text" id="search-query" placeholder="Digite título ou autor..." required>
+            <button type="submit" class="submit-button"><i class="fas fa-search"></i> Buscar</button>
+          </form>
+          <div class="search-results" id="search-results"></div>
+        </div>
+
+        <!-- Botões de filtro -->
         <div class="filter-buttons">
           <button data-filter="all" aria-selected="true">Todos</button>
           <button data-filter="quero-ler">Quero Ler</button>
@@ -129,255 +130,7 @@
     <p>&copy; 2025 Palavraria. Todos os direitos reservados.</p>
   </footer>
 
-  <script>
-    // ===== VARIÁVEIS GLOBAIS =====
-    let books = JSON.parse(localStorage.getItem('books')) || [];
-    let logs = JSON.parse(localStorage.getItem('logs')) || [];
-
-    // ===== ELEMENTOS DO DOM =====
-    // Progresso de leitura
-    const currentPageInput = document.getElementById("current-page");
-    const totalPagesInput = document.getElementById("total-pages");
-    const progressFill = document.getElementById("progress-fill");
-    const progressPercentage = document.getElementById("progress-percentage");
-    const readingForm = document.getElementById("reading-progress-form");
-    const recentLogs = document.getElementById("recent-logs");
-    const bookSelect = document.getElementById("book-select");
-
-    // Biblioteca
-    const booksGrid = document.getElementById("books-grid");
-    const addBookForm = document.getElementById("add-book-form");
-    const filterButtons = document.querySelectorAll(".filter-buttons button");
-
-    // Estatísticas
-    const booksReadElement = document.getElementById("books-read");
-    const booksInProgressElement = document.getElementById("books-in-progress");
-
-    // ===== FUNÇÕES DE INICIALIZAÇÃO =====
-    function initializeApp() {
-      updateProgressBar();
-      renderBooks();
-      renderLogs();
-      populateBookSelect();
-      updateStats();
-
-      // Adicionar event listeners
-      setupEventListeners();
-    }
-
-    function setupEventListeners() {
-      // Barra de progresso
-      currentPageInput.addEventListener("input", updateProgressBar);
-      totalPagesInput.addEventListener("input", updateProgressBar);
-
-      // Formulário de progresso
-      readingForm.addEventListener("submit", handleReadingProgressSubmit);
-
-      // Formulário de adicionar livro
-      addBookForm.addEventListener("submit", handleAddBookSubmit);
-
-      // Botões de filtro
-      filterButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          filterButtons.forEach(b => b.setAttribute("aria-selected", "false"));
-          btn.setAttribute("aria-selected", "true");
-          renderBooks(btn.dataset.filter);
-        });
-      });
-
-      // Botão de adicionar favoritos
-      document.getElementById("add-favorite-btn").addEventListener("click", addFavorites);
-    }
-
-    // ===== FUNÇÕES DA BARRA DE PROGRESSO =====
-    function updateProgressBar() {
-      const current = Number(currentPageInput.value);
-      const total = Number(totalPagesInput.value);
-      const percent = total > 0 ? Math.min(Math.round((current / total) * 100), 100) : 0;
-      progressFill.style.width = percent + "%";
-      progressPercentage.textContent = percent + "%";
-    }
-
-    // ===== FUNÇÕES DO FORMULÁRIO DE PROGRESSO =====
-    function handleReadingProgressSubmit(e) {
-      e.preventDefault();
-      const book = bookSelect.value;
-      const page = currentPageInput.value;
-      const total = totalPagesInput.value;
-      const comment = document.getElementById("comment").value;
-
-      if (!book || !page || !total) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
-        return;
-      }
-
-      // Adicionar registro
-      const newLog = {
-        book,
-        page: parseInt(page),
-        total: parseInt(total),
-        comment,
-        date: new Date().toISOString().split('T')[0]
-      };
-
-      logs.unshift(newLog);
-      localStorage.setItem('logs', JSON.stringify(logs));
-
-      // Atualizar status do livro se necessário
-      updateBookStatus(book, page, total);
-
-      // Atualizar a UI
-      renderLogs();
-      readingForm.reset();
-      updateProgressBar();
-      updateStats();
-
-      alert("Progresso registrado com sucesso!");
-    }
-
-    function updateBookStatus(bookTitle, currentPage, totalPages) {
-      const bookIndex = books.findIndex(b => b.title === bookTitle);
-      if (bookIndex !== -1) {
-        if (currentPage >= totalPages) {
-          books[bookIndex].status = "lido";
-        } else if (books[bookIndex].status === "quero-ler") {
-          books[bookIndex].status = "lendo";
-        }
-        localStorage.setItem('books', JSON.stringify(books));
-        renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
-        populateBookSelect();
-      }
-    }
-
-    function populateBookSelect() {
-      // Limpar opções existentes (exceto a primeira)
-      while (bookSelect.options.length > 1) {
-        bookSelect.remove(1);
-      }
-
-      // Adicionar livros que não foram finalizados
-      const unfinishedBooks = books.filter(book =>
-        book.status === "lendo" || book.status === "quero-ler" || book.status === "relendo"
-      );
-
-      unfinishedBooks.forEach(book => {
-        const option = document.createElement("option");
-        option.value = book.title;
-        option.textContent = book.title;
-        bookSelect.appendChild(option);
-      });
-    }
-
-    // ===== FUNÇÕES DE RENDERIZAÇÃO =====
-    function renderBooks(filter = "all") {
-      booksGrid.innerHTML = "";
-      const filtered = filter === "all" ? books : books.filter(b => b.status === filter);
-
-      if (!filtered.length) {
-        booksGrid.innerHTML = '<div class="empty-state">Nenhum livro encontrado.</div>';
-        return;
-      }
-
-      filtered.forEach(book => {
-        const div = document.createElement("div");
-        div.className = "book-item";
-        div.innerHTML = `
-          <div class="book-title">${book.title}</div>
-          <div class="book-author">${book.author}</div>
-          <span class="book-status" data-status="${book.status}">${formatStatus(book.status)}</span>
-        `;
-        booksGrid.appendChild(div);
-      });
-    }
-
-    function renderLogs() {
-      recentLogs.innerHTML = "";
-
-      if (!logs.length) {
-        recentLogs.innerHTML = '<div class="empty-state">Nenhum registro de leitura encontrado.</div>';
-        return;
-      }
-
-      // Mostrar apenas os 5 registros mais recentes
-      const recent = logs.slice(0, 5);
-
-      recent.forEach(log => {
-        const li = document.createElement("li");
-        li.className = "log-item";
-        li.innerHTML = `
-          <div>
-            <strong class="log-book">${log.book}</strong>
-            <div class="log-details">Página ${log.page} de ${log.total} • ${formatDate(log.date)}</div>
-            <div class="log-comment">${log.comment || "Sem comentário"}</div>
-          </div>
-        `;
-        recentLogs.appendChild(li);
-      });
-    }
-
-    // ===== FUNÇÕES DO FORMULÁRIO DE LIVROS =====
-    function handleAddBookSubmit(e) {
-      e.preventDefault();
-      const title = document.getElementById("book-title").value.trim();
-      const author = document.getElementById("book-author").value.trim();
-      const status = document.getElementById("book-status").value;
-
-      if (!title || !author) {
-        alert("Por favor, preencha título e autor.");
-        return;
-      }
-
-      // Verificar se o livro já existe
-      if (books.some(b => b.title.toLowerCase() === title.toLowerCase())) {
-        alert("Este livro já está na sua biblioteca.");
-        return;
-      }
-
-      books.push({ title, author, status });
-      localStorage.setItem('books', JSON.stringify(books));
-
-      addBookForm.reset();
-      renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
-      populateBookSelect();
-      updateStats();
-
-      alert("Livro adicionado com sucesso!");
-    }
-
-    // ===== FUNÇÕES AUXILIARES =====
-    function formatStatus(status) {
-      const statusMap = {
-        "lendo": "Lendo",
-        "lido": "Lido",
-        "relendo": "Relendo",
-        "quero-ler": "Quero Ler",
-        "abandonado": "Abandonado"
-      };
-      return statusMap[status] || status;
-    }
-
-    function formatDate(dateString) {
-      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-      return new Date(dateString).toLocaleDateString('pt-BR', options);
-    }
-
-    function addFavorites() {
-      alert("Funcionalidade de favoritos será implementada em breve!");
-    }
-
-    function updateStats() {
-      const booksRead = books.filter(book => book.status === "lido").length;
-      const booksInProgress = books.filter(book =>
-        book.status === "lendo" || book.status === "relendo"
-      ).length;
-
-      booksReadElement.textContent = booksRead;
-      booksInProgressElement.textContent = booksInProgress;
-    }
-
-    // ===== INICIALIZAÇÃO DA APLICAÇÃO =====
-    document.addEventListener('DOMContentLoaded', initializeApp);
-  </script>
+  <script src="./scripts/profile.js"></script>
 </body>
 
 </html>

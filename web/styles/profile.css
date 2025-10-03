@@ -574,3 +574,67 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+.search-books {
+    margin-bottom: 1.5rem;
+}
+
+.search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.search-item {
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 0.8rem;
+    border-radius: 8px;
+    gap: 0.8rem;
+    justify-content: space-between;
+}
+
+.search-thumb {
+    width: 50px;
+    height: auto;
+    border-radius: 4px;
+}
+
+.search-info {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.add-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background: #45a049;
+}
+
+.progress-extras {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.progress-extras>div {
+    flex: 1;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .progress-extras {
+        flex-direction: column;
+    }
+}
