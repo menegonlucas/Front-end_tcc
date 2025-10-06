@@ -830,14 +830,37 @@
             opacity: 1;
             transform: translateY(-2px);
         }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Cal Sans', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .logo-img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            transition: transform 0.25s ease;
+
+        }
+
+        .logo:hover .logo-img {
+            transform: translateY(-2px) scale(1.03);
+        }
     </style>
 </head>
 
 <body>
     <header class="main-header">
         <div class="logo">
-            <!-- CORREÇÃO 1: Substituído por ícone para evitar problema de imagem local -->
-            <i class="fas fa-book-open" style="font-size: 2rem;"></i>
+            <img src="./img/logo.png" alt="Palavraria" class="logo-img">
             <span>Sistema de Buscas</span>
         </div>
         <div class="user-profile">
@@ -857,8 +880,8 @@
     <main> <!-- CORREÇÃO 2: Adicionado elemento main para acessibilidade -->
         <div class="container">
             <div class="content-header">
-                <h1><i class="fas fa-book"></i> Palavraria</h1>
-                <p>Encontre livros usando a API do Google Books integrada à Palavraria 🔍</p>
+                <h1>Palavraria</h1>
+                <p>Encontre livros usando a API do Google Books integrada à Palavraria</p>
             </div>
 
             <div class="search-container">
