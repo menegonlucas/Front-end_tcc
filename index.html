@@ -8,14 +8,403 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cal+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./web/styles/index.css">
+    <style>
+        :root {
+            --color-primary: rgba(34, 51, 59, 0.9);
+            --color-secondary: rgba(198, 173, 143, 0.85);
+            --color-background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            --color-text-primary: #2c3e50;
+            --color-text-secondary: rgba(86, 98, 112, 0.8);
+            --color-border: rgba(224, 217, 207, 0.5);
+            --color-hover: rgba(26, 40, 46, 0.9);
+            --color-success: rgba(76, 175, 80, 0.8);
+            --color-error: rgba(244, 67, 54, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Animation */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--color-background);
+        }
+
+        .background-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(198, 173, 143, 0.1) 0%, transparent 70%);
+            animation: float 20s infinite linear;
+            z-index: -1;
+        }
+
+        .background-animation::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-5%, -5%) rotate(180deg);
+            }
+
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        /* Form Container */
+        .form {
+            background: var(--glass-bg);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 450px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+        }
+
+        .form:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Logo */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-container h1 {
+            font-family: 'Cal Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-text-primary), var(--color-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+
+        .form:hover .logo-container h1 {
+            transform: translateY(-3px);
+        }
+
+        /* Title */
+        .title-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+            transition: var(--transition);
+        }
+
+        .form:hover .title {
+            transform: translateY(-2px);
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form:hover .subtitle {
+            transform: translateY(-1px);
+        }
+
+        /* Input Groups */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input {
+            width: 100%;
+            padding: 1.2rem 1rem 0.8rem;
+            border: 2px solid transparent;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            color: var(--color-text-primary);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 0 3px rgba(198, 173, 143, 0.2);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .input-label {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: var(--color-text-secondary);
+            pointer-events: none;
+            transition: var(--transition);
+            background: transparent;
+            padding: 0 0.25rem;
+        }
+
+        .input:focus+.input-label,
+        .input:not(:placeholder-shown)+.input-label {
+            top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--color-secondary);
+            transform: translateY(0);
+        }
+
+        .input-border {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+            transition: var(--transition);
+        }
+
+        .input:focus~.input-border {
+            width: 100%;
+        }
+
+        /* Options Container */
+        .options-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .forgot-password {
+            color: var(--color-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Button */
+        .button-confirm {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-hover));
+            color: white;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-confirm::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .button-confirm:hover::before {
+            left: 100%;
+        }
+
+        .button-confirm:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, var(--color-hover), var(--color-primary));
+        }
+
+        .button-confirm:active {
+            transform: translateY(0);
+        }
+
+        .arrow-icon {
+            width: 20px;
+            height: 20px;
+            transition: var(--transition);
+        }
+
+        .button-confirm:hover .arrow-icon {
+            transform: translateX(5px);
+        }
+
+        /* Signup Link */
+        .signup-link {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .signup-link a {
+            color: var(--color-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .signup-link a:hover {
+            color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Cadastro Section */
+        .cadastro-section {
+            display: none;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .cadastro-section.active {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form {
+                padding: 2rem 1.5rem;
+            }
+
+            .logo-container h1 {
+                font-size: 2rem;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .options-container {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+
+            .form {
+                padding: 1.5rem;
+            }
+
+            .logo-container h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="background-animation"></div>
 
-    <form class="form">
+    <form class="form" id="loginForm">
         <div class="logo-container">
             <h1>Palavraria</h1>
         </div>
@@ -38,59 +427,85 @@
         </div>
 
         <div class="options-container">
-            <div class="remember-me">
-                <input type="checkbox" id="remember">
-                <label for="remember">Lembrar de mim</label>
-            </div>
             <a href="#" class="forgot-password">Esqueceu a senha?</a>
         </div>
 
-        <button class="button-confirm">
+        <button class="button-confirm" type="submit">
             <span>Entrar</span>
             <svg viewBox="0 0 24 24" class="arrow-icon">
                 <path stroke="currentColor" stroke-width="2" fill="none" d="M5 12h14M12 5l7 7-7 7" />
             </svg>
         </button>
 
-        <div class="divider">
-            <span>ou</span>
+        <p class="signup-link">Não tem uma conta? <a href="#" id="showCadastro">Cadastre-se</a></p>
+
+        <!-- Seção de Cadastro -->
+        <div class="cadastro-section" id="cadastroSection">
+            <div class="title-container">
+                <h2 class="title">Criar Conta</h2>
+                <p class="subtitle">Preencha os dados para se cadastrar</p>
+            </div>
+
+            <div class="input-group">
+                <input class="input" name="nome" placeholder=" " type="text" required>
+                <label class="input-label">Nome Completo</label>
+                <span class="input-border"></span>
+            </div>
+
+            <div class="input-group">
+                <input class="input" name="email-cadastro" placeholder=" " type="email" required>
+                <label class="input-label">E-mail</label>
+                <span class="input-border"></span>
+            </div>
+
+            <div class="input-group">
+                <input class="input" name="senha-cadastro" placeholder=" " type="password" required>
+                <label class="input-label">Senha</label>
+                <span class="input-border"></span>
+            </div>
+
+            <div class="input-group">
+                <input class="input" name="confirmar-senha" placeholder=" " type="password" required>
+                <label class="input-label">Confirmar Senha</label>
+                <span class="input-border"></span>
+            </div>
+
+            <button class="button-confirm" type="button" id="cadastrarBtn">
+                <span>Criar Conta</span>
+                <svg viewBox="0 0 24 24" class="arrow-icon">
+                    <path stroke="currentColor" stroke-width="2" fill="none" d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <p class="signup-link">Já tem uma conta? <a href="#" id="showLogin">Fazer Login</a></p>
         </div>
-
-        <div class="login-with">
-            <button type="button" class="button-log" aria-label="Login com Twitter">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                </svg>
-            </button>
-
-            <button type="button" class="button-log" aria-label="Login com Google">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                </svg>
-            </button>
-
-            <button type="button" class="button-log" aria-label="Login com Facebook">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                </svg>
-            </button>
-        </div>
-
-        <p class="signup-link">Não tem uma conta? <a href="#">Cadastre-se</a></p>
     </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('.form');
+            const loginForm = document.getElementById('loginForm');
+            const cadastroSection = document.getElementById('cadastroSection');
+            const showCadastro = document.getElementById('showCadastro');
+            const showLogin = document.getElementById('showLogin');
+            const cadastrarBtn = document.getElementById('cadastrarBtn');
 
-            form.addEventListener('submit', async function (e) {
+            // Alternar entre login e cadastro
+            showCadastro.addEventListener('click', function (e) {
+                e.preventDefault();
+                cadastroSection.classList.add('active');
+            });
+
+            showLogin.addEventListener('click', function (e) {
+                e.preventDefault();
+                cadastroSection.classList.remove('active');
+            });
+
+            // Login
+            loginForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                const email = form.querySelector('input[name="email"]').value.trim();
-                const senha = form.querySelector('input[name="password"]').value;
+                const email = loginForm.querySelector('input[name="email"]').value.trim();
+                const senha = loginForm.querySelector('input[name="password"]').value;
 
                 if (!email || !senha) {
                     alert('Por favor, preencha todos os campos.');
@@ -101,7 +516,7 @@
                     const res = await fetch("https://tcc-back-2025.vercel.app/api/auth/login", {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, senha }) // atenção: backend espera "senha"
+                        body: JSON.stringify({ email, senha })
                     });
 
                     const data = await res.json();
@@ -109,13 +524,20 @@
                     if (res.ok) {
                         alert('Login bem-sucedido!');
 
-                        // salva token se existir
+                        // Salva token e informações do usuário
                         if (data.token) {
                             localStorage.setItem('token', data.token);
+                            localStorage.setItem('userData', JSON.stringify(data.user));
                         }
 
-                        // redireciona para a página de admin
-                        window.location.href = './web/profile.html';
+                        // REDIRECIONAMENTO BASEADO NO TIPO DE USUÁRIO
+                        if (data.user && data.user.tipo === 'admin') {
+                            // Se for admin, redireciona para página de administração
+                            window.location.href = './web/admin.html';
+                        } else {
+                            // Se for usuário comum, redireciona para perfil
+                            window.location.href = './web/profile.html';
+                        }
                     } else {
                         alert(data.message || 'Usuário ou senha inválidos.');
                     }
@@ -124,11 +546,64 @@
                     alert('Erro na conexão com o servidor.');
                 }
             });
+            // Cadastro
+            cadastrarBtn.addEventListener('click', async function () {
+                const nome = loginForm.querySelector('input[name="nome"]').value.trim();
+                const email = loginForm.querySelector('input[name="email-cadastro"]').value.trim();
+                const senha = loginForm.querySelector('input[name="senha-cadastro"]').value;
+                const confirmarSenha = loginForm.querySelector('input[name="confirmar-senha"]').value;
+
+                if (!nome || !email || !senha || !confirmarSenha) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+
+                if (senha !== confirmarSenha) {
+                    alert('As senhas não coincidem.');
+                    return;
+                }
+
+                if (senha.length < 6) {
+                    alert('A senha deve ter pelo menos 6 caracteres.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch("https://tcc-back-2025.vercel.app/api/auth/register", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nome,
+                            email,
+                            senha
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        alert('Cadastro realizado com sucesso! Redirecionando para seu perfil...');
+
+                        // Salva token e informações do usuário
+                        if (data.token) {
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('userData', JSON.stringify(data.user));
+                        }
+
+                        // SEMPRE REDIRECIONA PARA O PERFIL AO CRIAR CONTA
+                        window.location.href = './web/profile.html';
+
+                    } else {
+                        alert(data.message || 'Erro ao criar conta. Tente novamente.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Erro na conexão com o servidor.');
+                }
+            });
         });
+
     </script>
-
-
-
 </body>
 
 </html>
