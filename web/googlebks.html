@@ -148,22 +148,32 @@
 
         .profile-menu {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 0.5rem);
             right: 0;
             background: var(--glass-bg);
             border-radius: var(--radius-sm);
             box-shadow: var(--glass-shadow);
-            width: 200px;
+            width: 220px;
             display: none;
-            z-index: 100;
+            z-index: 300;
             overflow: hidden;
-            margin-top: 0.5rem;
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--glass-border);
-            transform: translateY(-10px);
+            transform: translateY(-6px);
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            pointer-events: none;
+        }
+
+        /* mostrar com classe 'open' (toggle por clique) ou ainda por hover */
+        .profile-menu.open,
+        .user-profile:hover .profile-menu {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+            animation: slideDown 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         .profile-menu a {
@@ -903,9 +913,7 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <p>© 2025 Palavraria - Projeto de TCC</p>
-    </footer>
+
 
     <script>
         document.getElementById("searchBtn").addEventListener("click", searchBooks);
@@ -1030,6 +1038,37 @@
             bookDetailsDiv.classList.remove("active");
             document.getElementById("results").scrollIntoView({ behavior: "smooth" });
         }
+        function hideBookDetails() {
+            const bookDetailsDiv = document.getElementById("bookDetails");
+            bookDetailsDiv.classList.remove("active");
+            document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // Melhorar usabilidade do profile menu: toggle por clique, fecha ao clicar fora ou apertar Escape
+        (function () {
+            const userProfile = document.querySelector('.user-profile');
+            const profileMenu = document.querySelector('.profile-menu');
+
+            if (!userProfile || !profileMenu) return;
+
+            // abre/fecha ao clicar no bloco do usuário
+            userProfile.addEventListener('click', (e) => {
+                profileMenu.classList.toggle('open');
+                e.stopPropagation(); // não propagar para o document
+            });
+
+            // fecha ao clicar em qualquer lugar fora do menu
+            document.addEventListener('click', (e) => {
+                if (!profileMenu.contains(e.target) && !userProfile.contains(e.target)) {
+                    profileMenu.classList.remove('open');
+                }
+            });
+
+            // fecha com Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') profileMenu.classList.remove('open');
+            });
+        })();
     </script>
 </body>
 

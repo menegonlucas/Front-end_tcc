@@ -163,7 +163,18 @@
       border: 1px solid var(--glass-border);
       transform: translateY(-10px);
       opacity: 0;
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      pointer-events: none;
+    }
+
+    /* mostrar com classe 'open' (toggle por clique) ou ainda por hover */
+    .profile-menu.open,
+    .user-profile:hover .profile-menu {
+      display: block;
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+      animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
 
     .profile-menu a {
@@ -197,8 +208,10 @@
     }
 
     .user-profile:hover .profile-menu {
+      /* mantém suporte por hover, sem quebrar o toggle por clique */
       display: block;
       animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      pointer-events: auto;
     }
 
     /* Container principal */
@@ -1101,6 +1114,35 @@
   <footer class="footer">
     <p>&copy; 2025 Palavraria. Todos os direitos reservados.</p>
   </footer>
+  <script>
+    (function () {
+      const userProfile = document.querySelector('.user-profile');
+      const profileMenu = document.querySelector('.profile-menu');
+
+      if (!userProfile || !profileMenu) return;
+
+      // toggle ao clicar no bloco do usuário
+      userProfile.addEventListener('click', (e) => {
+        profileMenu.classList.toggle('open');
+        e.stopPropagation();
+      });
+
+      // impedir que clicar dentro do menu feche imediatamente
+      profileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      // fecha ao clicar fora
+      document.addEventListener('click', () => {
+        profileMenu.classList.remove('open');
+      });
+
+      // fecha com Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') profileMenu.classList.remove('open');
+      });
+    })();
+  </script>
 
   <script src="../web/scripts/profile.js"></script>
 </body>
