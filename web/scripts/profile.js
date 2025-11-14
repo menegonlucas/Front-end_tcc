@@ -21,13 +21,12 @@ const searchForm = document.getElementById("search-book-form");
 const searchQuery = document.getElementById("search-query");
 const searchResults = document.getElementById("search-results");
 
-// ===== BACKEND: CARREGAR LIVROS VIA GET =====
+
 async function loadBooksFromBackend() {
     try {
-        const response = await fetch("https://tcc-back-2025.vercel.app/livros"); // Ajuste conforme seu backend
+        const response = await fetch("https://tcc-back-2025.vercel.app/livros");
         const data = await response.json();
 
-        // Atualiza os livros com os dados do backend
         books = data;
 
         localStorage.setItem('books', JSON.stringify(books));
@@ -41,7 +40,6 @@ async function loadBooksFromBackend() {
     }
 }
 
-// ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', initializeApp);
 
 async function initializeApp() {
@@ -52,7 +50,6 @@ async function initializeApp() {
     setupEventListeners();
 }
 
-// ===== EVENT LISTENERS =====
 function setupEventListeners() {
     currentPageInput.addEventListener("input", updateProgressBar);
     totalPagesInput.addEventListener("input", updateProgressBar);
@@ -70,7 +67,6 @@ function setupEventListeners() {
     searchForm.addEventListener("submit", searchBooks);
 }
 
-// ===== PROGRESSO DE LEITURA =====
 function updateProgressBar() {
     const current = Number(currentPageInput.value);
     const total = Number(totalPagesInput.value);
@@ -140,7 +136,6 @@ function populateBookSelect() {
     });
 }
 
-// ===== RENDER =====
 function renderBooks(filter = "all") {
     booksGrid.innerHTML = "";
     const filtered = filter === "all" ? books : books.filter(b => b.status === filter);
@@ -155,7 +150,7 @@ function renderBooks(filter = "all") {
         div.className = "book-card";
         div.innerHTML = `
             <h4>${book.titulo}</h4>
-            <p>${book.author}</p>
+            <p>${book.autor}</p>
             <span class="status">${formatStatus(book.status)}</span>
         `;
         booksGrid.appendChild(div);
@@ -183,7 +178,6 @@ function renderLogs() {
     });
 }
 
-// ===== FUNÇÕES AUXILIARES =====
 function formatStatus(status) {
     const statusMap = {
         "lendo": "Lendo",
@@ -230,7 +224,7 @@ async function searchBooks(e) {
         searchResults.innerHTML = "";
         data.items.forEach(item => {
             const titulo = item.volumeInfo.titulo || "Sem título";
-            const authors = item.volumeInfo.authors ? item.volumeInfo.authors.join(", ") : "Autor desconhecido";
+            const autor = item.volumeInfo.autor ? item.volumeInfo.autor.join(", ") : "Autor desconhecido";
             const thumbnail = item.volumeInfo.imageLinks?.thumbnail || "";
 
             const div = document.createElement("div");
@@ -239,7 +233,7 @@ async function searchBooks(e) {
                 <img src="${thumbnail}" alt="${titulo}" class="search-thumb">
                 <div class="search-info">
                     <strong>${titulo}</strong><br>
-                    <em>${authors}</em>
+                    <em>${autor}</em>
                 </div>
                 <button class="add-btn"><i class="fas fa-plus"></i> Adicionar</button>
             `;
@@ -249,7 +243,7 @@ async function searchBooks(e) {
                     alert("Este livro já está na sua biblioteca.");
                     return;
                 }
-                books.push({ titulo, author: authors, status: "quero-ler" });
+                books.push({ titulo, autor: autores, status: "quero-ler" });
                 localStorage.setItem('books', JSON.stringify(books));
                 renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
                 populateBookSelect();
