@@ -513,7 +513,7 @@
                 }
 
                 try {
-                    const res = await fetch("https://tcc-back-2025.vercel.app/api/auth/login", {
+                    const res = await fetch("https://tcc-back-2025.vercel.app/auth/login", {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, senha })
@@ -569,7 +569,7 @@
                 }
 
                 try {
-                    const res = await fetch("https://tcc-back-2025.vercel.app/api/auth/register", {
+                    const res = await fetch("https://tcc-back-2025.vercel.app/usuarios", {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

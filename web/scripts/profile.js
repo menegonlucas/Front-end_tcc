@@ -21,18 +21,38 @@ const searchForm = document.getElementById("search-book-form");
 const searchQuery = document.getElementById("search-query");
 const searchResults = document.getElementById("search-results");
 
+// ===== BACKEND: CARREGAR LIVROS VIA GET =====
+async function loadBooksFromBackend() {
+    try {
+        const response = await fetch("https://tcc-back-2025.vercel.app/livros"); // Ajuste conforme seu backend
+        const data = await response.json();
+
+        // Atualiza os livros com os dados do backend
+        books = data;
+
+        localStorage.setItem('books', JSON.stringify(books));
+
+        renderBooks();
+        populateBookSelect();
+        updateStats();
+
+    } catch (error) {
+        console.error("Erro ao carregar livros do servidor:", error);
+    }
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', initializeApp);
 
-function initializeApp() {
+async function initializeApp() {
+    await loadBooksFromBackend(); // <-- NOVO
+
     updateProgressBar();
-    renderBooks();
     renderLogs();
-    populateBookSelect();
-    updateStats();
     setupEventListeners();
 }
 
+// ===== EVENT LISTENERS =====
 function setupEventListeners() {
     currentPageInput.addEventListener("input", updateProgressBar);
     totalPagesInput.addEventListener("input", updateProgressBar);
@@ -92,8 +112,8 @@ function handleReadingProgressSubmit(e) {
     alert("Progresso registrado com sucesso!");
 }
 
-function updateBookStatus(bookTitle, currentPage, totalPages) {
-    const bookIndex = books.findIndex(b => b.title === bookTitle);
+function updateBookStatus(bookTitulo, currentPage, totalPages) {
+    const bookIndex = books.findIndex(b => b.titulo === bookTitulo);
     if (bookIndex !== -1) {
         if (currentPage >= totalPages) {
             books[bookIndex].status = "lido";
@@ -106,17 +126,16 @@ function updateBookStatus(bookTitle, currentPage, totalPages) {
     }
 }
 
+// ===== SELECT DE LIVROS =====
 function populateBookSelect() {
     while (bookSelect.options.length > 1) {
         bookSelect.remove(1);
     }
-    const unfinishedBooks = books.filter(book =>
-        book.status === "lendo" || book.status === "quero-ler" || book.status === "relendo"
-    );
-    unfinishedBooks.forEach(book => {
+    console.log(books);
+    books.forEach(book => {
         const option = document.createElement("option");
-        option.value = book.title;
-        option.textContent = book.title;
+        option.value = book.titulo;
+        option.textContent = book.titulo;
         bookSelect.appendChild(option);
     });
 }
@@ -135,7 +154,7 @@ function renderBooks(filter = "all") {
         const div = document.createElement("div");
         div.className = "book-card";
         div.innerHTML = `
-            <h4>${book.title}</h4>
+            <h4>${book.titulo}</h4>
             <p>${book.author}</p>
             <span class="status">${formatStatus(book.status)}</span>
         `;
@@ -190,7 +209,7 @@ function updateStats() {
     booksInProgressElement.textContent = booksInProgress;
 }
 
-// ===== PESQUISA NA API GOOGLE BOOKS =====
+// ===== PESQUISA GOOGLE BOOKS =====
 async function searchBooks(e) {
     e.preventDefault();
     const query = searchQuery.value.trim();
@@ -210,27 +229,27 @@ async function searchBooks(e) {
 
         searchResults.innerHTML = "";
         data.items.forEach(item => {
-            const title = item.volumeInfo.title || "Sem título";
+            const titulo = item.volumeInfo.titulo || "Sem título";
             const authors = item.volumeInfo.authors ? item.volumeInfo.authors.join(", ") : "Autor desconhecido";
             const thumbnail = item.volumeInfo.imageLinks?.thumbnail || "";
 
             const div = document.createElement("div");
             div.className = "search-item";
             div.innerHTML = `
-                <img src="${thumbnail}" alt="${title}" class="search-thumb">
+                <img src="${thumbnail}" alt="${titulo}" class="search-thumb">
                 <div class="search-info">
-                    <strong>${title}</strong><br>
+                    <strong>${titulo}</strong><br>
                     <em>${authors}</em>
                 </div>
                 <button class="add-btn"><i class="fas fa-plus"></i> Adicionar</button>
             `;
 
             div.querySelector(".add-btn").addEventListener("click", () => {
-                if (books.some(b => b.title.toLowerCase() === title.toLowerCase())) {
+                if (books.some(b => b.titulo.toLowerCase() === titulo.toLowerCase())) {
                     alert("Este livro já está na sua biblioteca.");
                     return;
                 }
-                books.push({ title, author: authors, status: "quero-ler" });
+                books.push({ titulo, author: authors, status: "quero-ler" });
                 localStorage.setItem('books', JSON.stringify(books));
                 renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
                 populateBookSelect();
