@@ -48,6 +48,7 @@
       <div class="registration-container">
         <h2>Registrar Leitura</h2>
 
+
         <form id="reading-registration-form" class="registration-form">
           <!-- Seleção do Livro -->
           <div class="form-group">
@@ -56,9 +57,6 @@
             </label>
             <select id="book-select-register" required>
               <option value="">Selecione um livro da sua biblioteca</option>
-              <option value="book1">Dom Casmurro - Machado de Assis</option>
-              <option value="book2">1984 - George Orwell</option>
-              <option value="book3">O Senhor dos Anéis - J.R.R. Tolkien</option>
             </select>
           </div>
 
@@ -66,9 +64,9 @@
           <div class="form-row">
             <div class="form-group">
               <label for="current-page-register">
-                <i class="fas fa-file-alt"></i> Página Atual
+                <i class="fas fa-file-alt"></i> Página Atual (Opcional)
               </label>
-              <input type="number" id="current-page-register" min="1" placeholder="Ex: 150" required>
+              <input type="number" id="current-page-register" min="0" placeholder="Ex: 150">
             </div>
 
             <div class="form-group">
@@ -122,35 +120,14 @@
               placeholder="Compartilhe suas impressões sobre a leitura, notas, citações favoritas..."></textarea>
           </div>
 
-          <!-- Avaliação -->
-          <div class="form-group">
-            <label>
-              <i class="fas fa-star"></i> Avaliação
-            </label>
-            <div class="rating-stars">
-              <input type="radio" id="star5" name="rating" value="5">
-              <label for="star5">⭐</label>
 
-              <input type="radio" id="star4" name="rating" value="4">
-              <label for="star4">⭐</label>
-
-              <input type="radio" id="star3" name="rating" value="3">
-              <label for="star3">⭐</label>
-
-              <input type="radio" id="star2" name="rating" value="2">
-              <label for="star2">⭐</label>
-
-              <input type="radio" id="star1" name="rating" value="1">
-              <label for="star1">⭐</label>
-            </div>
-          </div>
 
           <!-- Botões -->
           <div class="form-actions">
             <button type="submit" class="submit-button large-button">
               <i class="fas fa-save"></i> Registrar Leitura
             </button>
-            <button type="button" class="cancel-button">
+            <button type="button" class="cancel-button" id="cancel-button">
               <i class="fas fa-times"></i> Cancelar
             </button>
           </div>
@@ -176,80 +153,6 @@
       </div>
     </section>
   </main>
-
-  <footer class="footer">
-    <p>&copy; 2025 Palavraria. Todos os direitos reservados.</p>
-  </footer>
-
-  <script>
-    (function () {
-      const userProfile = document.querySelector('.user-profile');
-      const profileMenu = document.querySelector('.profile-menu');
-
-      if (!userProfile || !profileMenu) return;
-
-      // toggle ao clicar no bloco do usuário
-      userProfile.addEventListener('click', (e) => {
-        profileMenu.classList.toggle('open');
-        e.stopPropagation();
-      });
-
-      // impedir que clicar dentro do menu feche imediatamente
-      profileMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-
-      // fecha ao clicar fora
-      document.addEventListener('click', () => {
-        profileMenu.classList.remove('open');
-      });
-
-      // fecha com Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') profileMenu.classList.remove('open');
-      });
-    })();
-
-    function calculateProgress() {
-      const currentPage = parseInt(document.getElementById('current-page-register').value) || 0;
-      const totalPages = parseInt(document.getElementById('total-pages-register').value) || 1;
-
-      const percentage = Math.min(100, Math.round((currentPage / totalPages) * 100));
-
-      document.getElementById('progress-percentage-register').textContent = percentage + '%';
-      document.getElementById('progress-fill-register').style.width = percentage + '%';
-    }
-
-    // Event listeners para cálculo automático
-    document.getElementById('current-page-register').addEventListener('input', calculateProgress);
-    document.getElementById('total-pages-register').addEventListener('input', calculateProgress);
-
-    // Submissão do formulário
-    document.getElementById('reading-registration-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const formData = {
-        book: document.getElementById('book-select-register').value,
-        currentPage: document.getElementById('current-page-register').value,
-        totalPages: document.getElementById('total-pages-register').value,
-        status: document.getElementById('reading-status').value,
-        date: document.getElementById('reading-date').value,
-        comment: document.getElementById('reading-comment').value,
-        rating: document.querySelector('input[name="rating"]:checked')?.value
-      };
-
-      console.log('Dados do registro:', formData);
-      // Aqui você enviaria os dados para o backend
-
-      alert('Leitura registrada com sucesso!');
-      this.reset();
-      calculateProgress(); // Resetar progresso
-    });
-
-    // Data atual como padrão
-    document.getElementById('reading-date').valueAsDate = new Date();
-  </script>
-
   <script src="../web/scripts/profile.js"></script>
 </body>
 

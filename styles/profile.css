@@ -1304,3 +1304,21 @@ body {
 main {
     flex: 1;
 }
+
+.remove-book-btn {
+    background: #d9534f;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.remove-book-btn:hover {
+    background: #c9302c;
+}

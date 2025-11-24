@@ -1,260 +1,558 @@
-// ===== VARIÁVEIS GLOBAIS =====
-let books = JSON.parse(localStorage.getItem('books')) || [];
-let logs = JSON.parse(localStorage.getItem('logs')) || [];
+const API_URL = "https://tcc-back-2025.vercel.app/livros";
+const booksGrid = document.getElementById('books-grid');
+const filterButtons = document.querySelectorAll('.filter-buttons button');
+const bookSelect = document.getElementById('book-select-register');
+let livrosCache = [];
 
-// ===== ELEMENTOS DO DOM =====
-const currentPageInput = document.getElementById("current-page");
-const totalPagesInput = document.getElementById("total-pages");
-const progressFill = document.getElementById("progress-fill");
-const progressPercentage = document.getElementById("progress-percentage");
-const readingForm = document.getElementById("reading-progress-form");
-const recentLogs = document.getElementById("recent-logs");
-const bookSelect = document.getElementById("book-select");
-
-const booksGrid = document.getElementById("books-grid");
-const filterButtons = document.querySelectorAll(".filter-buttons button");
-
-const booksReadElement = document.getElementById("books-read");
-const booksInProgressElement = document.getElementById("books-in-progress");
-
-const searchForm = document.getElementById("search-book-form");
-const searchQuery = document.getElementById("search-query");
-const searchResults = document.getElementById("search-results");
-
-
-async function loadBooksFromBackend() {
-    try {
-        const response = await fetch("https://tcc-back-2025.vercel.app/livros");
-        const data = await response.json();
-
-        books = data;
-
-        localStorage.setItem('books', JSON.stringify(books));
-
-        renderBooks();
-        populateBookSelect();
-        updateStats();
-
-    } catch (error) {
-        console.error("Erro ao carregar livros do servidor:", error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-async function initializeApp() {
-    await loadBooksFromBackend(); // <-- NOVO
-
-    updateProgressBar();
-    renderLogs();
+// =========================
+// 1. INICIALIZAÇÃO
+// =========================
+document.addEventListener('DOMContentLoaded', function() {
+    carregarLivros();
+    carregarLivrosParaFormulario();
     setupEventListeners();
-}
+    verificarLivrosAdicionados();
+});
 
+// =========================
+// 2. CONFIGURAÇÃO DE EVENTOS
+// =========================
 function setupEventListeners() {
-    currentPageInput.addEventListener("input", updateProgressBar);
-    totalPagesInput.addEventListener("input", updateProgressBar);
+    // Menu do usuário
+    const userProfile = document.querySelector('.user-profile');
+    const profileMenu = document.querySelector('.profile-menu');
 
-    readingForm.addEventListener("submit", handleReadingProgressSubmit);
-
-    filterButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            filterButtons.forEach(b => b.setAttribute("aria-selected", "false"));
-            btn.setAttribute("aria-selected", "true");
-            renderBooks(btn.dataset.filter);
+    if (userProfile && profileMenu) {
+        userProfile.addEventListener('click', (e) => {
+            profileMenu.classList.toggle('open');
+            e.stopPropagation();
         });
+
+        document.addEventListener('click', () => {
+            profileMenu.classList.remove('open');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') profileMenu.classList.remove('open');
+        });
+    }
+
+    // Cálculo de progresso
+    document.getElementById('current-page-register').addEventListener('input', calculateProgress);
+    document.getElementById('total-pages-register').addEventListener('input', calculateProgress);
+
+    // Formulário de registro
+    document.getElementById('reading-registration-form').addEventListener('submit', handleFormSubmit);
+    
+    // Botão cancelar
+    document.getElementById('cancel-button').addEventListener('click', resetForm);
+
+    // Filtros
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => aplicarFiltro(btn.dataset.filter));
     });
 
-    searchForm.addEventListener("submit", searchBooks);
+    // Quando selecionar um livro no formulário, preencher automaticamente os dados
+    bookSelect.addEventListener('change', preencherDadosLivroSelecionado);
+
+    // Verificar periodicamente por novos livros
+    setInterval(verificarLivrosAdicionados, 3000);
 }
 
-function updateProgressBar() {
-    const current = Number(currentPageInput.value);
-    const total = Number(totalPagesInput.value);
-    const percent = total > 0 ? Math.min(Math.round((current / total) * 100), 100) : 0;
-    progressFill.style.width = percent + "%";
-    progressPercentage.textContent = percent + "%";
-}
-
-function handleReadingProgressSubmit(e) {
-    e.preventDefault();
-    const book = bookSelect.value;
-    const page = currentPageInput.value;
-    const total = totalPagesInput.value;
-    const comment = document.getElementById("comment").value;
-
-    if (!book || !page || !total) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
-        return;
-    }
-
-    const newLog = {
-        book,
-        page: parseInt(page),
-        total: parseInt(total),
-        comment,
-        date: new Date().toISOString().split('T')[0]
-    };
-
-    logs.unshift(newLog);
-    localStorage.setItem('logs', JSON.stringify(logs));
-
-    updateBookStatus(book, page, total);
-
-    renderLogs();
-    readingForm.reset();
-    updateProgressBar();
-    updateStats();
-
-    alert("Progresso registrado com sucesso!");
-}
-
-function updateBookStatus(bookTitulo, currentPage, totalPages) {
-    const bookIndex = books.findIndex(b => b.titulo === bookTitulo);
-    if (bookIndex !== -1) {
-        if (currentPage >= totalPages) {
-            books[bookIndex].status = "lido";
-        } else if (books[bookIndex].status === "quero-ler") {
-            books[bookIndex].status = "lendo";
-        }
-        localStorage.setItem('books', JSON.stringify(books));
-        renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
-        populateBookSelect();
-    }
-}
-
-// ===== SELECT DE LIVROS =====
-function populateBookSelect() {
-    while (bookSelect.options.length > 1) {
-        bookSelect.remove(1);
-    }
-    console.log(books);
-    books.forEach(book => {
-        const option = document.createElement("option");
-        option.value = book.titulo;
-        option.textContent = book.titulo;
-        bookSelect.appendChild(option);
-    });
-}
-
-function renderBooks(filter = "all") {
-    booksGrid.innerHTML = "";
-    const filtered = filter === "all" ? books : books.filter(b => b.status === filter);
-
-    if (!filtered.length) {
-        booksGrid.innerHTML = '<div class="empty-state">Nenhum livro encontrado.</div>';
-        return;
-    }
-
-    filtered.forEach(book => {
-        const div = document.createElement("div");
-        div.className = "book-card";
-        div.innerHTML = `
-            <h4>${book.titulo}</h4>
-            <p>${book.autor}</p>
-            <span class="status">${formatStatus(book.status)}</span>
-        `;
-        booksGrid.appendChild(div);
-    });
-}
-
-function renderLogs() {
-    recentLogs.innerHTML = "";
-    if (!logs.length) {
-        recentLogs.innerHTML = '<div class="empty-state">Nenhum registro de leitura encontrado.</div>';
-        return;
-    }
-    const recent = logs.slice(0, 5);
-    recent.forEach(log => {
-        const li = document.createElement("li");
-        li.className = "log-item";
-        li.innerHTML = `
-            <div>
-                <strong class="log-book">${log.book}</strong>
-                <div class="log-details">Página ${log.page} de ${log.total} • ${formatDate(log.date)}</div>
-                <div class="log-comment">${log.comment || "Sem comentário"}</div>
-            </div>
-        `;
-        recentLogs.appendChild(li);
-    });
-}
-
-function formatStatus(status) {
-    const statusMap = {
-        "lendo": "Lendo",
-        "lido": "Lido",
-        "relendo": "Relendo",
-        "quero-ler": "Quero Ler",
-        "abandonado": "Abandonado"
-    };
-    return statusMap[status] || status;
-}
-
-function formatDate(dateString) {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('pt-BR', options);
-}
-
-function updateStats() {
-    const booksRead = books.filter(book => book.status === "lido").length;
-    const booksInProgress = books.filter(book =>
-        book.status === "lendo" || book.status === "relendo"
-    ).length;
-    booksReadElement.textContent = booksRead;
-    booksInProgressElement.textContent = booksInProgress;
-}
-
-// ===== PESQUISA GOOGLE BOOKS =====
-async function searchBooks(e) {
-    e.preventDefault();
-    const query = searchQuery.value.trim();
-    if (!query) return;
-    searchResults.innerHTML = "<p>Buscando...</p>";
-
+// =========================
+// 3. CARREGAR LIVROS DA BIBLIOTECA
+// =========================
+async function carregarLivros() {
     try {
-        const response = await fetch(
-            `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10`
-        );
-        const data = await response.json();
+        booksGrid.innerHTML = '<div class="loading">Carregando livros...</div>';
+        
+        const res = await fetch(API_URL);
+        
+        if (!res.ok) {
+            throw new Error(`Erro HTTP: ${res.status}`);
+        }
+        
+        const livros = await res.json();
+        livrosCache = livros;
 
-        if (!data.items || data.items.length === 0) {
-            searchResults.innerHTML = "<p>Nenhum resultado encontrado.</p>";
+        if (!livros || livros.length === 0) {
+            booksGrid.innerHTML = '<div class="empty-state">Nenhum livro adicionado à biblioteca</div>';
             return;
         }
 
-        searchResults.innerHTML = "";
-        data.items.forEach(item => {
-            const titulo = item.volumeInfo.titulo || "Sem título";
-            const autor = item.volumeInfo.autor ? item.volumeInfo.autor.join(", ") : "Autor desconhecido";
-            const thumbnail = item.volumeInfo.imageLinks?.thumbnail || "";
-
-            const div = document.createElement("div");
-            div.className = "search-item";
-            div.innerHTML = `
-                <img src="${thumbnail}" alt="${titulo}" class="search-thumb">
-                <div class="search-info">
-                    <strong>${titulo}</strong><br>
-                    <em>${autor}</em>
-                </div>
-                <button class="add-btn"><i class="fas fa-plus"></i> Adicionar</button>
-            `;
-
-            div.querySelector(".add-btn").addEventListener("click", () => {
-                if (books.some(b => b.titulo.toLowerCase() === titulo.toLowerCase())) {
-                    alert("Este livro já está na sua biblioteca.");
-                    return;
-                }
-                books.push({ titulo, autor: autores, status: "quero-ler" });
-                localStorage.setItem('books', JSON.stringify(books));
-                renderBooks(document.querySelector(".filter-buttons button[aria-selected='true']").dataset.filter);
-                populateBookSelect();
-                updateStats();
-                alert("Livro adicionado à sua biblioteca!");
-            });
-
-            searchResults.appendChild(div);
-        });
-    } catch (error) {
-        console.error(error);
-        searchResults.innerHTML = "<p>Erro ao buscar livros. Tente novamente.</p>";
+        renderizarLivros(livros);
+    } catch (err) {
+        console.error('Erro ao carregar livros:', err);
+        booksGrid.innerHTML = '<div class="error-state">Erro ao carregar livros. Tente novamente mais tarde.</div>';
     }
 }
+
+// =========================
+// 4. CARREGAR LIVROS PARA FORMULÁRIO
+// =========================
+async function carregarLivrosParaFormulario() {
+    try {
+        // Limpar select exceto primeira opção
+        while (bookSelect.children.length > 1) {
+            bookSelect.removeChild(bookSelect.lastChild);
+        }
+
+        const res = await fetch(API_URL);
+        
+        if (!res.ok) {
+            throw new Error('Erro ao carregar livros');
+        }
+
+        const livros = await res.json();
+        livrosCache = livros;
+
+        if (livros && livros.length > 0) {
+            livros.forEach(livro => {
+                const option = document.createElement('option');
+                option.value = livro.id;
+                option.textContent = `${livro.titulo} - ${livro.autor}`;
+                option.setAttribute('data-paginas', livro.paginas || 0);
+                bookSelect.appendChild(option);
+            });
+        } else {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Nenhum livro na biblioteca';
+            bookSelect.appendChild(option);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar livros para formulário:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Erro ao carregar livros';
+        bookSelect.appendChild(option);
+    }
+}
+
+// =========================
+// 5. PREENCHER DADOS DO LIVRO SELECIONADO
+// =========================
+function preencherDadosLivroSelecionado() {
+    const livroId = bookSelect.value;
+    if (!livroId) {
+        resetForm();
+        return;
+    }
+    
+    // Buscar livro no cache
+    const livro = livrosCache.find(l => l.id == livroId);
+    if (livro) {
+        // Preencher total de páginas (se não existir, usar o padrão do livro)
+        document.getElementById('total-pages-register').value = livro.totalPaginas || livro.paginas || '';
+        
+        // Preencher status atual se existir
+        if (livro.status) {
+            document.getElementById('reading-status').value = livro.status;
+        }
+        
+        // Preencher página atual se existir
+        if (livro.paginaAtual) {
+            document.getElementById('current-page-register').value = livro.paginaAtual;
+        }
+        
+        // Preencher avaliação se existir
+        if (livro.avaliacao) {
+            const ratingInput = document.querySelector(`input[name="rating"][value="${livro.avaliacao}"]`);
+            if (ratingInput) {
+                ratingInput.checked = true;
+            }
+        }
+        
+        // Preencher comentário se existir
+        if (livro.comentario) {
+            document.getElementById('reading-comment').value = livro.comentario;
+        }
+        
+        // Preencher data se existir
+        if (livro.dataLeitura) {
+            document.getElementById('reading-date').value = livro.dataLeitura;
+        }
+        
+        // Recalcular progresso
+        calculateProgress();
+    }
+}
+
+// =========================
+// 6. RENDERIZAR LIVROS NA GRADE
+// =========================
+function renderizarLivros(lista) {
+    booksGrid.innerHTML = '';
+
+    lista.forEach((livro) => {
+        if (!livro.id) {
+            console.warn('Livro sem ID:', livro);
+            return;
+        }
+
+        const card = document.createElement('div');
+        card.classList.add('book-card');
+        card.setAttribute('data-status', livro.status || 'all');
+        card.setAttribute('data-id', livro.id);
+
+        // Calcular progresso
+        const totalPaginas = livro.totalPaginas || livro.paginas || 1;
+        const paginaAtual = livro.paginaAtual || 0;
+        const progresso = Math.min(100, Math.round((paginaAtual / totalPaginas) * 100));
+
+        // Gerar estrelas para avaliação
+        let estrelasHTML = '';
+        if (livro.avaliacao) {
+            const estrelasCheias = livro.avaliacao;
+            const estrelasVazias = 5 - livro.avaliacao;
+            estrelasHTML = `
+                <p class="book-rating">
+                    <strong>Avaliação:</strong> 
+                    <span class="rating-stars-display">
+                        ${'★'.repeat(estrelasCheias)}${'☆'.repeat(estrelasVazias)}
+                    </span>
+                </p>
+            `;
+        }
+
+        // Verificar se há comentário
+        const comentarioHTML = livro.comentario ? 
+            `<p class="book-comment"><strong>Comentário:</strong> ${livro.comentario}</p>` : '';
+
+        card.innerHTML = `
+            <div class="book-cover">
+                ${livro.capa ? 
+                    `<img src="${livro.capa}" alt="${livro.titulo || 'Livro'}" onerror="this.parentElement.innerHTML='<div class=\"book-cover-placeholder\"><i class=\"fas fa-book\"></i></div>'">` : 
+                    `<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>`
+                }
+            </div>
+            <div class="book-info">
+                <h3 class="book-title">${livro.titulo || 'Título não disponível'}</h3>
+                <p class="book-author">${livro.autor || 'Autor desconhecido'}</p>
+                <p class="book-status"><strong>Status:</strong> <span class="status-${livro.status || 'none'}">${formatarStatus(livro.status)}</span></p>
+                <p class="book-pages"><strong>Progresso:</strong> ${paginaAtual}/${totalPaginas} páginas (${progresso}%)</p>
+                <div class="progress-bar-small">
+                    <div class="progress-fill-small" style="width: ${progresso}%"></div>
+                </div>
+                ${estrelasHTML}
+                ${comentarioHTML}
+                <button class="remove-book-btn" data-id="${livro.id}">
+                    <i class="fas fa-trash"></i> Remover
+                </button>
+            </div>
+        `;
+
+        booksGrid.appendChild(card);
+    });
+
+    ativarBotoesRemover();
+    adicionarEstilosDinamicos();
+}
+
+// =========================
+// 7. FUNÇÕES DE FORMULÁRIO
+// =========================
+function calculateProgress() {
+    const currentPage = parseInt(document.getElementById('current-page-register').value) || 0;
+    const totalPages = parseInt(document.getElementById('total-pages-register').value) || 1;
+
+    const percentage = Math.min(100, Math.round((currentPage / totalPages) * 100));
+
+    document.getElementById('progress-percentage-register').textContent = percentage + '%';
+    document.getElementById('progress-fill-register').style.width = percentage + '%';
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const livroId = document.getElementById('book-select-register').value;
+    const currentPage = document.getElementById('current-page-register').value;
+    const totalPages = document.getElementById('total-pages-register').value;
+    const status = document.getElementById('reading-status').value;
+    const date = document.getElementById('reading-date').value;
+    const comment = document.getElementById('reading-comment').value;
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    const rating = ratingInput ? ratingInput.value : null;
+
+    if (!livroId) {
+        alert('Por favor, selecione um livro');
+        return;
+    }
+
+    if (!status) {
+        alert('Por favor, selecione um status para a leitura');
+        return;
+    }
+
+    if (!totalPages) {
+        alert('Por favor, informe o total de páginas do livro');
+        return;
+    }
+
+    try {
+        // Preparar dados para atualização
+        const updateData = {
+            status: status,
+            paginaAtual: parseInt(currentPage) || 0,
+            totalPaginas: parseInt(totalPages)
+        };
+
+        // Adicionar avaliação se fornecida
+        if (rating) {
+            updateData.avaliacao = parseInt(rating);
+        }
+
+        // Adicionar comentário se fornecido
+        if (comment) {
+            updateData.comentario = comment;
+        }
+
+        // Adicionar data se fornecida
+        if (date) {
+            updateData.dataLeitura = date;
+        }
+
+        console.log('Enviando dados para atualização:', updateData);
+
+        // Atualizar o livro no backend
+        const res = await fetch(`${API_URL}/${livroId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (res.ok) {
+            const livroAtualizado = await res.json();
+            console.log('Livro atualizado com sucesso:', livroAtualizado);
+            
+            alert('Leitura registrada com sucesso!');
+            resetForm();
+            
+            // Atualizar cache e interface
+            const index = livrosCache.findIndex(l => l.id == livroId);
+            if (index !== -1) {
+                livrosCache[index] = { ...livrosCache[index], ...updateData };
+            }
+            
+            carregarLivros(); // Recarregar a biblioteca
+        } else {
+            const erro = await res.text();
+            console.error('Erro na resposta:', res.status, erro);
+            throw new Error(`Erro ${res.status}: ${erro}`);
+        }
+    } catch (error) {
+        console.error('Erro ao registrar leitura:', error);
+        alert('Erro ao registrar leitura: ' + error.message);
+    }
+}
+
+function resetForm() {
+    document.getElementById('reading-registration-form').reset();
+    document.getElementById('total-pages-register').value = '';
+    document.getElementById('reading-date').valueAsDate = new Date();
+    calculateProgress();
+}
+
+// =========================
+// 8. FUNÇÕES DE FILTRO
+// =========================
+function aplicarFiltro(filtro) {
+    // Atualizar botões
+    filterButtons.forEach(b => b.setAttribute('aria-selected', 'false'));
+    const botaoAtivo = document.querySelector(`[data-filter="${filtro}"]`);
+    if (botaoAtivo) {
+        botaoAtivo.setAttribute('aria-selected', 'true');
+    }
+
+    // Aplicar filtro
+    const cards = document.querySelectorAll('.book-card');
+    let livrosVisiveis = 0;
+
+    cards.forEach(card => {
+        const status = card.getAttribute('data-status');
+
+        if (filtro === 'all' || status === filtro) {
+            card.style.display = 'flex';
+            livrosVisiveis++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Mostrar mensagem se não houver livros
+    const existingEmptyMessage = booksGrid.querySelector('.empty-state');
+    if (existingEmptyMessage) {
+        existingEmptyMessage.remove();
+    }
+
+    if (livrosVisiveis === 0 && cards.length > 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-state';
+        emptyMessage.textContent = `Nenhum livro encontrado com o filtro "${botaoAtivo ? botaoAtivo.textContent : filtro}"`;
+        booksGrid.appendChild(emptyMessage);
+    }
+}
+
+// =========================
+// 9. REMOVER LIVROS
+// =========================
+function ativarBotoesRemover() {
+    document.querySelectorAll('.remove-book-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+
+            if (!id) {
+                console.error('ID do livro não encontrado');
+                return;
+            }
+
+            if (!confirm('Deseja realmente remover este livro da biblioteca?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    // Animação de remoção
+                    const card = btn.closest('.book-card');
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        
+                        // Atualizar cache
+                        livrosCache = livrosCache.filter(l => l.id != id);
+                        
+                        // Recarregar lista do formulário
+                        carregarLivrosParaFormulario();
+                        
+                        // Verificar se ficou vazio
+                        if (document.querySelectorAll('.book-card').length === 0) {
+                            booksGrid.innerHTML = '<div class="empty-state">Nenhum livro adicionado à biblioteca</div>';
+                        }
+                    }, 300);
+                } else {
+                    alert('Erro ao remover livro. Tente novamente.');
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+                alert('Erro de conexão ao tentar remover livro.');
+            }
+        });
+    });
+}
+
+// =========================
+// 10. SINCRONIZAÇÃO ENTRE PÁGINAS
+// =========================
+function verificarLivrosAdicionados() {
+    const livroAdicionado = localStorage.getItem('livroAdicionado');
+    
+    if (livroAdicionado) {
+        try {
+            const livro = JSON.parse(livroAdicionado);
+            
+            // Se o livro foi adicionado há menos de 5 segundos, recarregar as listas
+            if (Date.now() - livro.timestamp < 5000) {
+                carregarLivros();
+                carregarLivrosParaFormulario();
+                localStorage.removeItem('livroAdicionado');
+                
+                // Selecionar automaticamente o livro recém-adicionado
+                setTimeout(() => {
+                    if (bookSelect) {
+                        bookSelect.value = livro.id;
+                        preencherDadosLivroSelecionado();
+                    }
+                }, 1000);
+            }
+        } catch (e) {
+            console.error('Erro ao processar livro adicionado:', e);
+            localStorage.removeItem('livroAdicionado');
+        }
+    }
+}
+
+// =========================
+// 11. UTILITÁRIOS
+// =========================
+function formatarStatus(status) {
+    const statusMap = {
+        'quero-ler': 'Quero Ler',
+        'lendo': 'Lendo',
+        'lido': 'Lido',
+        'relendo': 'Relendo',
+        'abandonado': 'Abandonado'
+    };
+    
+    return statusMap[status] || status || 'Não definido';
+}
+
+function adicionarEstilosDinamicos() {
+    // Verificar se os estilos já foram adicionados
+    if (document.getElementById('dynamic-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'dynamic-styles';
+    style.textContent = `
+        .progress-bar-small {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill-small {
+            height: 100%;
+            background: #3498db;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .status-quero-ler { color: #3498db; font-weight: 600; }
+        .status-lendo { color: #f39c12; font-weight: 600; }
+        .status-lido { color: #27ae60; font-weight: 600; }
+        .status-relendo { color: #9b59b6; font-weight: 600; }
+        .status-abandonado { color: #e74c3c; font-weight: 600; }
+        .status-none { color: #95a5a6; font-style: italic; }
+        
+        .book-comment {
+            font-style: italic;
+            color: #7f8c8d;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .rating-stars-display {
+            color: #f1c40f;
+            letter-spacing: 2px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// =========================
+// 12. FUNÇÕES GLOBAIS PARA DEBUG
+// =========================
+window.debugBiblioteca = {
+    recarregar: carregarLivros,
+    verCache: () => livrosCache,
+    limparForm: resetForm,
+    testarConexao: async () => {
+        try {
+            const res = await fetch(API_URL);
+            return { status: res.status, ok: res.ok };
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+};
+
+// Data atual como padrão
+document.getElementById('reading-date').valueAsDate = new Date();
