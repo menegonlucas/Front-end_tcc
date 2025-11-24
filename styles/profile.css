@@ -28,7 +28,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Stack Sans Text', sans-serif;
     background: var(--color-background);
     color: var(--color-text-primary);
     line-height: 1.6;
@@ -58,7 +58,7 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    font-family: 'Cal Sans', sans-serif;
+    font-family: 'Stack Sans Text', sans-serif;
     font-size: 1.6rem;
     font-weight: 700;
     gap: 0.75rem;
@@ -387,7 +387,7 @@ textarea {
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     font-size: 1rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Stack Sans Text', sans-serif;
     transition: var(--transition);
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(15px);
@@ -940,7 +940,7 @@ textarea:focus {
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     font-size: 1rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Stack Sans Text', sans-serif;
     transition: var(--transition);
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
@@ -1048,7 +1048,7 @@ textarea:focus {
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     font-size: 1rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Stack Sans Text', sans-serif;
     transition: var(--transition);
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);

@@ -44,9 +44,6 @@ function setupEventListeners() {
     // Formulário de registro
     document.getElementById('reading-registration-form').addEventListener('submit', handleFormSubmit);
     
-    // Botão cancelar
-    document.getElementById('cancel-button').addEventListener('click', resetForm);
-
     // Filtros
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => aplicarFiltro(btn.dataset.filter));
@@ -265,88 +262,71 @@ function calculateProgress() {
 async function handleFormSubmit(e) {
     e.preventDefault();
 
-    const livroId = document.getElementById('book-select-register').value;
-    const currentPage = document.getElementById('current-page-register').value;
-    const totalPages = document.getElementById('total-pages-register').value;
-    const status = document.getElementById('reading-status').value;
-    const date = document.getElementById('reading-date').value;
-    const comment = document.getElementById('reading-comment').value;
-    const ratingInput = document.querySelector('input[name="rating"]:checked');
-    const rating = ratingInput ? ratingInput.value : null;
+    const livroId = parseInt(document.getElementById('book-select-register').value);
+    const paginaAtual = parseInt(document.getElementById('current-page-register').value) || null;
+    const totalPaginas = parseInt(document.getElementById('total-pages-register').value) || null;
+    const statusLeitura = document.getElementById('reading-status').value;
+    const dataAtualizacao = document.getElementById('reading-date').value;
+    const comentario = document.getElementById('reading-comment').value || null;
 
-    if (!livroId) {
-        alert('Por favor, selecione um livro');
+    // PEGAR USUÁRIO LOGADO
+
+    const usuarioData = JSON.parse(localStorage.getItem("usuario"));
+console.log("USUARIO NO LOCALSTORAGE:", usuarioData);
+
+const usuarioId = usuarioData?.id;
+
+    if (!usuarioId) {
+        alert("Erro: usuário não encontrado. Faça login novamente.");
         return;
     }
 
-    if (!status) {
-        alert('Por favor, selecione um status para a leitura');
+    if (!livroId || !statusLeitura || !dataAtualizacao) {
+        alert("Preencha todos os campos obrigatórios!");
         return;
     }
 
-    if (!totalPages) {
-        alert('Por favor, informe o total de páginas do livro');
-        return;
-    }
+    const registroData = {
+        livroId,
+        usuarioId,
+        comentario,
+        statusLeitura,
+        totalPaginas,
+        paginaAtual,
+        dataAtualizacao
+    };
+
+    console.log("Enviando para API /registros:", registroData);
 
     try {
-        // Preparar dados para atualização
-        const updateData = {
-            status: status,
-            paginaAtual: parseInt(currentPage) || 0,
-            totalPaginas: parseInt(totalPages)
-        };
-
-        // Adicionar avaliação se fornecida
-        if (rating) {
-            updateData.avaliacao = parseInt(rating);
-        }
-
-        // Adicionar comentário se fornecido
-        if (comment) {
-            updateData.comentario = comment;
-        }
-
-        // Adicionar data se fornecida
-        if (date) {
-            updateData.dataLeitura = date;
-        }
-
-        console.log('Enviando dados para atualização:', updateData);
-
-        // Atualizar o livro no backend
-        const res = await fetch(`${API_URL}/${livroId}`, {
-            method: 'PUT',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updateData)
+        const res = await fetch("https://tcc-back-2025.vercel.app/registros", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(registroData)
         });
 
-        if (res.ok) {
-            const livroAtualizado = await res.json();
-            console.log('Livro atualizado com sucesso:', livroAtualizado);
-            
-            alert('Leitura registrada com sucesso!');
-            resetForm();
-            
-            // Atualizar cache e interface
-            const index = livrosCache.findIndex(l => l.id == livroId);
-            if (index !== -1) {
-                livrosCache[index] = { ...livrosCache[index], ...updateData };
-            }
-            
-            carregarLivros(); // Recarregar a biblioteca
-        } else {
-            const erro = await res.text();
-            console.error('Erro na resposta:', res.status, erro);
-            throw new Error(`Erro ${res.status}: ${erro}`);
+        if (!res.ok) {
+            const txt = await res.text();
+            console.error("Erro da API:", txt);
+            throw new Error("Erro ao registrar leitura");
         }
-    } catch (error) {
-        console.error('Erro ao registrar leitura:', error);
-        alert('Erro ao registrar leitura: ' + error.message);
+
+        const result = await res.json();
+        console.log("Registro criado:", result);
+
+        alert("Leitura registrada com sucesso!");
+
+        resetForm();
+
+        // Recarregar livros para atualizar progresso na biblioteca
+        carregarLivros();
+
+    } catch (err) {
+        console.error("Erro criação registro:", err);
+        alert("Erro ao registrar leitura.");
     }
 }
+
 
 function resetForm() {
     document.getElementById('reading-registration-form').reset();
