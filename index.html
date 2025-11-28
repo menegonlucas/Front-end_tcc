@@ -140,6 +140,8 @@
                     }
 
                     localStorage.setItem("token", data.token);
+                    localStorage.setItem("usuario", JSON.stringify(data)); 
+
                     localStorage.setItem("userData", JSON.stringify(data.user));
 
                     if (data.user && data.user.tipo) {
