@@ -40,16 +40,5 @@ https://menegonlucas.github.io/Front-end_tcc/
      ```
    - Acessar `http://localhost:8080/web/googlebks.html`.
 
-## Contribuições
-Contribuições são bem-vindas. Para contribuir:
-1. Fork do repositório.
-2. Criar branch com a feature ou correção.
-3. Abrir Pull Request com descrição clara das alterações.
-
-## Licença
-Licença aberta — especificar LICENÇA no repositório conforme necessidade (ex.: MIT).
-
-## Contato
-Projeto mantido por Menegon Lucas — ver página do repositório no GitHub para contato e issues.
 > Demo pública: https://menegonlucas.github.io/Front-end_tcc/
 
